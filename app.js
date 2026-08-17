@@ -51,13 +51,13 @@
   document.querySelectorAll('.modal-overlay').forEach(ov=>{ ov.addEventListener('click', (e)=>{ if(e.target===ov) ov.classList.remove('open'); }); });
 
   const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyBgnwQii0VKSimPBS2l5oTUvX41yqbbcek",
-      authDomain: "vapt-sonar.firebaseapp.com",
+      apiKey: "",
+      authDomain: "",
       projectId: "vapt-sonar",
-      storageBucket: "vapt-sonar.firebasestorage.app",
-      messagingSenderId: "912877574816",
-      appId: "1:912877574816:web:1a9441e14b59d491d547c5",
-      measurementId: "G-Q99TDFSCLB"
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: "",
+      measurementId: ""
   };
 
   let firestoreDb = null;
