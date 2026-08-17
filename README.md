@@ -24,7 +24,7 @@ A premium, glassmorphism-styled dashboard designed for engineering and security 
 ## 📂 File Structure
 
 ```text
-/usr/share/nginx/sonar-vapt/
+sonar-vapt/
 ├── index.html        # Main dashboard structure and modals
 ├── style.css         # Dark glassmorphism UI, responsive layout, animations
 ├── app.js            # Core logic, Firebase sync, Chart.js rendering, and DOM manipulation
