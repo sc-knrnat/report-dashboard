@@ -1,82 +1,57 @@
-# VAPT-Sonar: Security & Quality Sprint Console
+# 🛡️ VAPT-Sonar: Security & Quality Sprint Console
 
-A premium, glassmorphism-styled dashboard designed for engineering and security teams to track, manage, and compare Vulnerability Assessment and Penetration Testing (VAPT) findings and SonarQube quality metrics across multiple microservices and sprints.
+A premium, glassmorphism-styled dashboard designed for engineering and security teams to track, manage, and compare Vulnerability Assessment and Penetration Testing (VAPT) findings alongside SonarQube quality metrics across multiple microservices and sprints.
+
+---
 
 ## ✨ Features
 
-* **Sprint Management**: Create, rename, delete, and seamlessly switch between sprint cycles.
-* **Microservice Tracking**: Monitor 14+ default microservices with the ability to add, edit, or delete custom services on the fly.
-* **VAPT Tracking**: Log Critical, High, Medium, Low, and Negligible security vulnerabilities per service.
-* **Sonar Scan Metrics**: Track Code Coverage, Duplications, Vulnerabilities, Bugs, Code Smells, and A-E grading gates.
-* **Dynamic Charting**: Visualizes data in real-time using Chart.js (Doughnut charts for issue distribution, Bar charts for top offenders, Line/Area charts for coverage trends).
-* **Sprint Comparison Engine**: A dedicated dashboard to compare Sprint A vs. Sprint B, automatically calculating deltas (increases/decreases) in technical debt and vulnerabilities.
-* **Optimistic Local Caching**: Instantly loads data from `localStorage` within milliseconds while silently syncing with the cloud in the background.
-* **Real-time Cloud Sync**: Powered by Firebase Firestore, ensuring your data is synchronized across all devices.
-* **Import & Export**: Download or upload data in JSON format at both the global (Sprint) level and the granular (Service) level.
+* **Sprint Management:** Create, rename, delete, and seamlessly switch between sprint cycles.
+* **Microservice Tracking:** Monitor 14+ default microservices with the ability to add, edit, or delete custom services on the fly.
+* **VAPT Tracking:** Log Critical, High, Medium, Low, and Negligible security vulnerabilities per service.
+* **Sonar Scan Metrics:** Track Code Coverage, Duplications, Vulnerabilities, Bugs, Code Smells, and A-E grading gates.
+* **Dynamic Charting:** Visualize data in real-time using Chart.js (Doughnut charts for issue distribution, Bar charts for top offenders, Line/Area charts for coverage trends).
+* **Sprint Comparison Engine:** Compare Sprint A vs. Sprint B on a dedicated dashboard that automatically calculates deltas (increases/decreases) in technical debt and vulnerabilities.
+* **Optimistic Local Caching:** Instantly load data from `localStorage` within milliseconds while silently syncing with the cloud in the background.
+* **Real-time Cloud Sync:** Powered by Firebase Firestore, ensuring your data is synchronized across all devices and team members instantly.
+* **Import & Export:** Download or upload data in JSON format at both the global (Sprint) level and the granular (Service) level.
+
+---
 
 ## 🛠️ Tech Stack
 
-* **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6+)
-* **Visualization**: Chart.js
-* **Database & Sync**: Firebase Firestore (v8 SDK) + LocalStorage API
-* **Web Server**: Nginx
+* **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES6+)
+* **Visualization:** Chart.js
+* **Database & Sync:** Firebase Firestore (v8 SDK), LocalStorage API
+* **Web Server:** Nginx
 
-## 📂 File Structure
+---
 
-```text
-sonar-vapt/
-├── index.html        # Main dashboard structure and modals
-├── style.css         # Dark glassmorphism UI, responsive layout, animations
-├── app.js            # Core logic, Firebase sync, Chart.js rendering, and DOM manipulation
-└── README.md         # Documentation
+## 🚀 Getting Started
 
-Firebase Configuration & Setup Steps
+### 1. Database Setup (Firebase Firestore)
+The dashboard uses Firebase Firestore to save your sprint data in the cloud. 
 
-The dashboard uses Firebase Firestore to save your sprint data in the cloud, ensuring it synchronizes instantly across all your devices and team members.
+1. Go to the [Firebase Console](https://console.firebase.google.com/).
+2. Click **Add project** and name it (e.g., `vapt-sonar`).
+3. Navigate to **Firestore Database** in the left-hand menu and click **Create database**.
+4. Choose **Start in test mode** (Note: Update your Firestore security rules before moving to production).
+5. Choose a geographic location closest to you and click **Enable**.
 
-1. How to create a database in Firebase
-Go to the Firebase Console.
+### 2. Get Your Firebase Configuration
+1. In the Firebase Console, click the **Gear Icon** next to "Project Overview" and select **Project settings**.
+2. Scroll to the "Your apps" section and click the **Web icon (`</>`)** to register a new web app.
+3. Give the app a nickname (e.g., `SonarVaptWeb`) and register it.
+4. Copy the `firebaseConfig` object from the generated SDK setup script.
 
-Click Add project (or "Create a project").
+### 3. Connect the Dashboard
+Open your local project files and update the configuration.
 
-Give your project a name (e.g., vapt-sonar) and click Continue. You can disable Google Analytics for this project.
+1. Locate the `app.js` file (e.g., at `/usr/share/nginx/sonar-vapt/app.js` on your server).
+2. Find the `FIREBASE_CONFIG` variable near the top of the file.
+3. Replace the placeholder object with your actual Firebase credentials:
 
-Once the project is created, navigate to Firestore Database in the left-hand menu.
-
-Click Create database.
-
-Choose Start in test mode (this allows you to read/write data easily without setting up authentication right away. Note: For production, you should update your Firestore security rules).
-
-Choose a geographic location closest to you and click Enable.
-
-2. Where to get the FIREBASE_CONFIG details
-In the left sidebar of the Firebase Console, click the Gear Icon next to "Project Overview" and select Project settings.
-
-Scroll down to the "Your apps" section and click the Web icon (</>) to register a new web app.
-
-Give the app a nickname (e.g., SonarVaptWeb) and register it.
-
-Firebase will generate an SDK setup script. Look for the firebaseConfig object block. It will look like this:
-
-const firebaseConfig = {
-    apiKey: "...",
-    authDomain: "vapt-sonar.firebaseapp.com",
-    projectId: "vapt-sonar",
-    storageBucket: "vapt-sonar.firebasestorage.app",
-    messagingSenderId: "",
-    appId: "1:1234567890:web:abcdef123456",
-    measurementId: "G-XXXXXXXX"
-};
-
-Copy this entire object.
-
-3. Where to put this in your project
-Open the app.js file located at /usr/share/nginx/sonar-vapt/app.js on your server.
-
-Locate the FIREBASE_CONFIG variable near the top of the file (around line 50).
-
-Replace the placeholder object with the exact values you copied from Firebase:
-
+```javascript
 const FIREBASE_CONFIG = {
     apiKey: "YOUR_API_KEY",
     authDomain: "YOUR_AUTH_DOMAIN",
@@ -86,18 +61,3 @@ const FIREBASE_CONFIG = {
     appId: "YOUR_APP_ID",
     measurementId: "YOUR_MEASUREMENT_ID"
 };
-
-Save the app.js file.
-
-Hard-refresh your browser (Ctrl + Shift + R or Cmd + Shift + R). The dashboard is now connected to your live database!
-
-📖 Usage Guide
-Create a Sprint: Click New Sprint in the top right. Give it a name (e.g., "Sprint 115").
-
-Add Data: Scroll to the VAPT or Sonar table. Click the Edit (Pen) icon next to a service to open the data entry modal.
-
-Manage Services: Click Manage Services at the bottom of the left sidebar to add custom repositories or link external dashboards.
-
-Compare Sprints: Navigate to the Compare Sprints tab in the sidebar, select a Base Sprint and a Comparison Sprint, and instantly view the generated delta metrics.
-
-Backup Data: Use the Export button in the top navigation bar to download a full JSON backup of the currently active sprint.
