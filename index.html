@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security &amp; Quality Sprint Report Dashboard</title>
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon-concentio-color.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js for Dynamic Data Visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="bg-animation" aria-hidden="true">
+    <div class="grid-overlay"></div>
+    <span class="orb orb-cyan"></span>
+    <span class="orb orb-purple"></span>
+    <span class="orb orb-cyan-2"></span>
+  </div>
+
+  <div class="app-shell">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="brand-text">
+          <span class="brand-title">VAPT&ndash;Sonar</span>
+          <span class="brand-subtitle">Security &amp; Quality Console</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-label">Workspace</span>
+        <ul>
+          <li class="nav-item active" data-target="dashboard">
+            <a href="#dashboard"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+          </li>
+          <li class="nav-item" data-target="vapt">
+            <a href="#vapt"><i class="fa-solid fa-bug-slash"></i><span>VAPT Findings</span></a>
+          </li>
+          <li class="nav-item" data-target="sonar">
+            <a href="#sonar"><i class="fa-solid fa-magnifying-glass-chart"></i><span>Sonar Scan</span></a>
+          </li>
+          <li class="nav-item" data-target="comparison">
+            <a href="#comparison"><i class="fa-solid fa-code-compare"></i><span>Compare Sprints</span></a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline" id="manageServicesBtn" type="button">
+          <i class="fa-solid fa-layer-group"></i><span>Manage Services</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ===================== MAIN CONTENT ===================== -->
+    <div class="main-content">
+
+      <!-- ===================== TOP NAVIGATION ===================== -->
+      <header class="topbar">
+        <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-label="Toggle sidebar">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="topbar-title">
+          <h1>Security &amp; Quality Sprint Report</h1>
+          <p>Continuous assurance across services &amp; branches</p>
+        </div>
+
+        <div class="topbar-controls">
+          <div class="sprint-selector" id="sprintSelectorWrap">
+            <i class="fa-solid fa-calendar-days"></i>
+            <button type="button" class="sprint-select-btn" id="sprintSelectBtn" disabled>
+              <span id="sprintSelectLabel">No sprints yet</span>
+            </button>
+            <i class="fa-solid fa-chevron-down chev"></i>
+            <div class="sprint-dropdown-list" id="sprintDropdownList"></div>
+          </div>
+
+          <button class="icon-btn sprint-action-btn" type="button" id="renameSprintBtn" aria-label="Rename sprint" title="Rename sprint">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="icon-btn sprint-action-btn danger" type="button" id="deleteSprintBtn" aria-label="Delete sprint" title="Delete sprint">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="Search services...">
+          </div>
+
+          <button class="btn btn-ghost" type="button" id="importBtn">
+            <i class="fa-solid fa-arrow-down-to-bracket"></i>
+            <span>Import</span>
+          </button>
+          <input type="file" id="importFileInput" accept="application/json,.json" style="display:none;">
+
+          <button class="btn btn-ghost" type="button" id="exportBtn">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+            <span>Export</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ===================== SCROLLABLE CONTENT ===================== -->
+      <main class="content-scroll" id="dashboard">
+
+        <!-- Action Bar -->
+        <section class="action-bar reveal">
+          <div class="action-bar-text">
+            <h2 class="gradient-text" id="actionBarTitle">No sprint selected</h2>
+            <p id="actionBarSub">Create a sprint to get started</p>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-primary" type="button" id="newSprintBtn"><i class="fa-solid fa-rocket"></i><span>New Sprint</span></button>
+          </div>
+        </section>
+
+        <!-- Empty state -->
+        <section class="glass-card empty-state reveal" id="emptyState" style="display:none;">
+          <i class="fa-solid fa-layer-group"></i>
+          <h3>No sprints yet</h3>
+          <p>Create your first sprint to start tracking VAPT findings and SonarQube quality gates for your services.</p>
+          <button class="btn btn-primary" type="button" id="emptyNewSprintBtn"><i class="fa-solid fa-rocket"></i><span>Create sprint</span></button>
+        </section>
+
+        <div id="dataSections">
+
+          <!-- Section: KPI Overview Cards -->
+          <section class="kpi-grid" aria-label="Key performance indicators">
+            <div class="kpi-card glass-card reveal">
+              <div class="kpi-icon icon-neutral"><i class="fa-solid fa-server"></i></div>
+              <div class="kpi-body">
+                <span class="kpi-label">Total Services</span>
+                <span class="kpi-value" id="totalServices">0</span>
+                <span class="kpi-trend trend-flat" id="totalServicesTrend">tracked this sprint</span>
+              </div>
+            </div>
+
+            <div class="kpi-card glass-card reveal severity-critical clickable-kpi" data-metric="critical" data-type="vapt">
+              <div class="kpi-icon icon-critical"><i class="fa-solid fa-skull-crossbones"></i></div>
+              <div class="kpi-body">
+                <span class="kpi-label">Critical Issues</span>
+                <span class="kpi-value" id="criticalCount">0</span>
+                <span class="kpi-trend trend-flat" id="criticalTrend" title="Click to view breakdown">no prior sprint</span>
+              </div>
+            </div>
+
+            <div class="kpi-card glass-card reveal severity-high clickable-kpi" data-metric="high" data-type="vapt">
+              <div class="kpi-icon icon-high"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="kpi-body">
+                <span class="kpi-label">High Issues</span>
+                <span class="kpi-value" id="highCount">0</span>
+                <span class="kpi-trend trend-flat" id="highTrend" title="Click to view breakdown">no prior sprint</span>
+              </div>
+            </div>
+
+            <div class="kpi-card glass-card reveal severity-medium clickable-kpi" data-metric="medium" data-type="vapt">
+              <div class="kpi-icon icon-medium"><i class="fa-solid fa-circle-exclamation"></i></div>
+              <div class="kpi-body">
+                <span class="kpi-label">Medium Issues</span>
+                <span class="kpi-value" id="mediumCount">0</span>
+                <span class="kpi-trend trend-flat" id="mediumTrend" title="Click to view breakdown">no prior sprint</span>
+              </div>
+            </div>
+
+            <div class="kpi-card glass-card reveal severity-low clickable-kpi" data-metric="low" data-type="vapt">
+              <div class="kpi-icon icon-low"><i class="fa-solid fa-circle-info"></i></div>
+              <div class="kpi-body">
+                <span class="kpi-label">Low Issues</span>
+                <span class="kpi-value" id="lowCount">0</span>
+                <span class="kpi-trend trend-flat" id="lowTrend" title="Click to view breakdown">no prior sprint</span>
+              </div>
+            </div>
+
+            <div class="kpi-card glass-card reveal">
+              <div class="kpi-icon icon-accent"><i class="fa-solid fa-code-branch"></i></div>
+              <div class="kpi-body">
+                <span class="kpi-label">Avg Coverage</span>
+                <span class="kpi-value" id="coverageAvg">0%</span>
+                <div class="mini-progress"><span id="coverageBar" style="width:0%"></span></div>
+              </div>
+            </div>
+
+            <div class="kpi-card glass-card reveal severity-critical clickable-kpi" data-metric="securityNum" data-type="sonar">
+              <div class="kpi-icon icon-critical"><i class="fa-solid fa-lock-open"></i></div>
+              <div class="kpi-body">
+                <span class="kpi-label">Security</span>
+                <span class="kpi-value" id="sonarVulnCount">0</span>
+                <span class="kpi-trend trend-flat" id="sonarVulnTrend" title="Click to view breakdown">no prior sprint</span>
+              </div>
+            </div>
+
+            <div class="kpi-card glass-card reveal severity-high clickable-kpi" data-metric="reliabilityNum" data-type="sonar">
+              <div class="kpi-icon icon-high"><i class="fa-solid fa-bug"></i></div>
+              <div class="kpi-body">
+                <span class="kpi-label">Reliability</span>
+                <span class="kpi-value" id="sonarBugsCount">0</span>
+                <span class="kpi-trend trend-flat" id="sonarBugsTrend" title="Click to view breakdown">no prior sprint</span>
+              </div>
+            </div>
+
+            <div class="kpi-card glass-card reveal severity-medium clickable-kpi" data-metric="maintainabilityNum" data-type="sonar">
+              <div class="kpi-icon icon-medium"><i class="fa-solid fa-wind"></i></div>
+              <div class="kpi-body">
+                <span class="kpi-label">Maintainability</span>
+                <span class="kpi-value" id="sonarSmellsCount">0</span>
+                <span class="kpi-trend trend-flat" id="sonarSmellsTrend" title="Click to view breakdown">no prior sprint</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section: Live Dynamic Charts (REDESIGNED WITH CHART.JS) -->
+          <section class="charts-grid">
+            <div class="chart-card glass-card reveal">
+              <div class="chart-card-head">
+                <h3><i class="fa-solid fa-chart-pie"></i> VAPT Severity Distribution</h3>
+                <span class="chart-tag">Overall</span>
+              </div>
+              <div class="chart-container" style="position: relative; height: 220px; width: 100%; margin-top:10px;">
+                <canvas id="vaptDoughnutChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card glass-card reveal">
+              <div class="chart-card-head">
+                <h3><i class="fa-solid fa-chart-column"></i> Top VAPT Offenders</h3>
+                <span class="chart-tag">Services</span>
+              </div>
+              <div class="chart-container" style="position: relative; height: 220px; width: 100%; margin-top:10px;">
+                <canvas id="topVaptServicesChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card glass-card reveal">
+              <div class="chart-card-head">
+                <h3><i class="fa-solid fa-chart-line"></i> Sonar Code Debt</h3>
+                <span class="chart-tag">Metrics</span>
+              </div>
+              <div class="chart-container" style="position: relative; height: 220px; width: 100%; margin-top:10px;">
+                <canvas id="sonarMetricsChart"></canvas>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section: VAPT Table -->
+          <section class="table-section reveal" id="vapt">
+            <div class="section-head">
+              <h3><i class="fa-solid fa-bug-slash"></i> VAPT Findings</h3>
+              <span class="chart-tag" id="vaptSprintLabel"></span>
+            </div>
+            <div class="table-wrap glass-card">
+              <table id="vaptTable">
+                <thead>
+                  <tr>
+                    <th class="sortable">Service <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Branch <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Critical <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">High <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Medium <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Low <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Negligible <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Status <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Updated <i class="fa-solid fa-sort"></i></th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="vaptBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Section: Sonar Scan Table -->
+          <section class="table-section reveal" id="sonar">
+            <div class="section-head">
+              <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Sonar Scan</h3>
+              <span class="chart-tag" id="sonarSprintLabel"></span>
+            </div>
+            <div class="table-wrap glass-card">
+              <table id="sonarTable">
+                <thead>
+                  <tr>
+                    <th class="sortable">Service <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Branch <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Security <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Reliability <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Maintainability <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Coverage <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Duplications <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Status <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable">Updated <i class="fa-solid fa-sort"></i></th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="sonarBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Comparison Dashboard Section -->
+          <section class="table-section reveal" id="comparison">
+            <div class="section-head">
+              <h3><i class="fa-solid fa-code-compare"></i> Sprint Comparison Dashboard</h3>
+            </div>
+            
+            <div class="glass-card comparison-panel">
+              <div class="comparison-controls">
+                <div class="field">
+                  <label>Base Sprint (A)</label>
+                  <select id="compSprintA"></select>
+                </div>
+                <div class="field">
+                  <label>Compare With (B)</label>
+                  <select id="compSprintB"></select>
+                </div>
+                <div class="field">
+                  <label>Target Scope</label>
+                  <select id="compServiceTarget">
+                    <option value="ALL">All Services</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="comparisonResults" class="comparison-results">
+                 <div class="detail-empty" style="margin:20px;">Select sprints to view comparison.</div>
+              </div>
+            </div>
+          </section>
+
+        </div><!-- /dataSections -->
+
+        <footer class="dashboard-footer">
+          <p>VAPT&ndash;Sonar &copy; 2026 &middot; Security &amp; Quality Console</p>
+        </footer>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ===================== ALL MODALS ===================== -->
+
+  <!-- Modal 1: Create / Rename Sprint -->
+  <div class="modal-overlay" id="sprintModal">
+    <div class="modal">
+      <h3 id="sprintModalTitle">Create new sprint</h3>
+      <p class="modal-sub" id="sprintModalSub">e.g. Sprint 24, Sprint-2026-08</p>
+      <div class="field full">
+        <label for="sprintNameInput">Sprint name</label>
+        <input type="text" id="sprintNameInput" placeholder="Sprint 24">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-close="sprintModal" type="button">Cancel</button>
+        <button class="btn btn-primary" id="createSprintBtn" type="button">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Edit VAPT -->
+  <div class="modal-overlay" id="vaptModal">
+    <div class="modal">
+      <h3 id="vaptModalTitle">VAPT — service</h3>
+      <p class="modal-sub" id="vaptModalSub"></p>
+      <div class="field full">
+        <label>Git branch</label>
+        <input type="text" id="f_branch" placeholder="feature/example-branch">
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Critical</label><input type="number" min="0" id="f_critical" value="0"></div>
+        <div class="field"><label>High</label><input type="number" min="0" id="f_high" value="0"></div>
+        <div class="field"><label>Medium</label><input type="number" min="0" id="f_medium" value="0"></div>
+        <div class="field"><label>Low</label><input type="number" min="0" id="f_low" value="0"></div>
+        <div class="field"><label>Negligible</label><input type="number" min="0" id="f_negligible" value="0"></div>
+      </div>
+      <div class="field full">
+        <label>Note</label>
+        <textarea id="f_note" placeholder="Remediation status, retest date, exceptions…"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-close="vaptModal" type="button">Cancel</button>
+        <button class="btn btn-primary" id="saveVaptBtn" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Edit Sonar -->
+  <div class="modal-overlay" id="sonarModal">
+    <div class="modal">
+      <h3 id="sonarModalTitle">Sonar scan — service</h3>
+      <p class="modal-sub" id="sonarModalSub"></p>
+      <div class="field full">
+        <label>Git branch</label>
+        <input type="text" id="s_branch" placeholder="feature/example-branch">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Security</label>
+          <div class="rating-input-group">
+            <input type="number" min="0" id="s_security_num" placeholder="Issues" value="0">
+            <select id="s_security"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Reliability</label>
+          <div class="rating-input-group">
+            <input type="number" min="0" id="s_reliability_num" placeholder="Issues" value="0">
+            <select id="s_reliability"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Maintainability</label>
+          <div class="rating-input-group">
+            <input type="number" min="0" id="s_maintainability_num" placeholder="Issues" value="0">
+            <select id="s_maintainability"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select>
+          </div>
+        </div>
+        <div class="field"><label>Hotspots reviewed (%)</label><input type="number" min="0" max="100" id="s_hotspots" value="0"></div>
+        <div class="field"><label>Code coverage (%)</label><input type="number" min="0" max="100" id="s_coverage" value="0"></div>
+        <div class="field"><label>Duplications (%)</label><input type="number" min="0" max="100" id="s_duplications" value="0"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-close="sonarModal" type="button">Cancel</button>
+        <button class="btn btn-primary" id="saveSonarBtn" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Manage Services -->
+  <div class="modal-overlay" id="servicesModal">
+    <div class="modal" style="max-width:600px;">
+      <h3>Manage services</h3>
+      <p class="modal-sub">Add services you want to track, or remove custom ones you've added.</p>
+
+      <div class="field-row">
+        <div class="field full">
+          <label>Service name</label>
+          <input type="text" id="newServiceName" placeholder="e.g. payment-gateway-service">
+        </div>
+        <div class="field full">
+          <label>Dashboard link (optional)</label>
+          <input type="text" id="newServiceLink" placeholder="https://...">
+        </div>
+      </div>
+      <div class="modal-actions" style="justify-content:flex-start; margin-top:0;">
+        <button class="btn btn-primary" id="addServiceBtn" type="button"><i class="fa-solid fa-plus"></i><span>Add service</span></button>
+      </div>
+
+      <div class="detail-section-title" style="margin-top:22px;">
+        <span>Tracked services (<span id="serviceCountLabel">0</span>)</span>
+      </div>
+      <div class="services-list" id="servicesList"></div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-close="servicesModal" type="button">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Service Detail (Eye Symbol) -->
+  <div class="modal-overlay" id="serviceDetailModal">
+    <div class="modal" style="max-width:660px;">
+      <div id="serviceDetailBody"></div>
+      <div class="modal-actions" style="justify-content: space-between;">
+        <div>
+           <button class="btn btn-ghost" id="detailExportServiceBtn" type="button"><i class="fa-solid fa-download"></i> Export Data</button>
+           <button class="btn btn-ghost" id="detailImportServiceBtn" type="button"><i class="fa-solid fa-upload"></i> Import Data</button>
+           <input type="file" id="serviceImportFileInput" accept=".json" style="display:none;">
+        </div>
+        <div>
+            <button class="btn btn-ghost" data-close="serviceDetailModal" type="button">Close</button>
+            <button class="btn btn-outline" id="detailEditVaptBtn" type="button"><i class="fa-solid fa-bug-slash"></i><span>Edit VAPT</span></button>
+            <button class="btn btn-primary" id="detailEditSonarBtn" type="button"><i class="fa-solid fa-magnifying-glass-chart"></i><span>Edit Sonar</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: Sprint Trend Breakdown -->
+  <div class="modal-overlay" id="trendBreakdownModal">
+    <div class="modal" style="max-width:560px;">
+      <h3 id="trendBreakdownTitle">Trend Breakdown</h3>
+      <p class="modal-sub" id="trendBreakdownSub">Comparison vs Previous Sprint</p>
+      <div class="services-list" id="trendBreakdownList" style="max-height: 400px; overflow-y: auto;"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" data-close="trendBreakdownModal" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Firebase JavaScript SDK (v8) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
